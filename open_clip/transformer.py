@@ -562,7 +562,7 @@ class VisionTransformer(nn.Module):
     
 
         
-    def custom_attn(self, attn_layer, x, ex_feats=None, beta=0.6, gamma=3.0, token_size=(16, 16),tk=190, beta2=1.2,beta3=1.2,gamma3=3.0):
+    def custom_attn(self, attn_layer, x, ex_feats=None, beta=0.6, gamma=3.0, token_size=(16, 16),beta2=1.2):
         
         num_heads = attn_layer.num_heads #12
         _, bsz, embed_dim = x.size() #shape =torch.Size([442, 1, 768])
@@ -575,15 +575,7 @@ class VisionTransformer(nn.Module):
         q_k = F.normalize(ex_feats.flatten(2, 3), dim=1) #torch.Size([1, 768, 1764])
         similarity = torch.einsum("b c m, b c n -> b m n", q_k, q_k) #torch.Size([1, 1764, 1764])
         similarityori = similarity
-        #proxyclip
-        # similaritypro = similarity
-        # similaritypro = (similaritypro - torch.mean(similaritypro) * beta3) * gamma3#torch.Size([1, 1764, 1764])
-        # similaritypro[similaritypro < 0.0] = float('-inf')
-
-        # maskp = similaritypro.to(q.dtype).unsqueeze(1).repeat(1, num_heads, 1, 1) #torch.Size([1, 12, 1764, 1764])
-        # maskp = maskp.reshape(bsz * num_heads, maskp.shape[2], maskp.shape[3])  #torch.Size([12, 1764, 1764])
-        # attn_weights = F.softmax(maskp, dim=-1) #torch.Size([12, 1764, 1764])
-
+        
         #pan
 
         sim1 = torch.mean(similarityori, dim =-1, keepdim=True) #torch.Size([1, 1764, 1])
@@ -599,7 +591,7 @@ class VisionTransformer(nn.Module):
         attn_weights = F.softmax(mask, dim=-1) #torch.Size([12, 1764, 1764])
 
 
-        # #second threshold with var
+        #second threshold with var
 
         similarityori2 = similarity
         similarityori2 = (similarityori2 - sim1 - std_similarity * beta2) / (std_similarity*gamma)#torch.Size([1, 1764, 1764])
@@ -607,21 +599,6 @@ class VisionTransformer(nn.Module):
         mask2 = similarityori2.to(q.dtype).unsqueeze(1).repeat(1, num_heads, 1, 1) #torch.Size([1, 12, 1764, 1764])
         mask2 = mask2.reshape(bsz * num_heads, mask2.shape[2], mask2.shape[3])  #torch.Size([12, 1764, 1764])
         attn_weights2 = F.softmax(mask2, dim=-1) #torch.Size([12, 1764, 1764])
-
-
-
-
-        #second threshold with kth
-
-        # sorted_similarity, sorted_indices = torch.sort(similaritytop,dim=-1,descending=True)
-        # kth_largest= sorted_similarity[:,:,tk-1] #torch.Size([1, 1764])
-        # simtopk = similaritytop - kth_largest.unsqueeze(-1)
-        # similaritytop = (simtopk ) /(std_similarity*gamma)
-        # similaritytop[similaritytop < 0.0] = float('-inf')
-        # mask2 = similaritytop.to(q.dtype).unsqueeze(1).repeat(1, num_heads, 1, 1) #torch.Size([1, 12, 1764, 1764])
-        # mask2 = mask2.reshape(bsz * num_heads, mask2.shape[2], mask2.shape[3])  #torch.Size([12, 1764, 1764])
-        # attn_weights2 = F.softmax(mask2, dim=-1) 
-
         
         v = v[:, 1:, :].reshape(bsz*num_heads, token_size[0], token_size[1], head_dim).permute(0, 3, 1, 2) #torch.Size([12, 64, 21, 21])
         v = F.interpolate(v, size=(H, W), mode='bilinear', align_corners=False) #torch.Size([12, 64, 42, 42])

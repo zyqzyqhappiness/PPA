@@ -46,16 +46,12 @@ class PPASegmentation(BaseSegmentor):
         self.vfm_model = vfm_model
         if vfm_model == 'sam':
             self.vfm = sam_model_registry["vit_b"](checkpoint=checkpoint)
-            # self.vfm = sam_model_registry["vit_l"](checkpoint=checkpoint)
+
 
         elif vfm_model == 'dino':
-            # self.vfm = torch.hub.load('facebookresearch/dino:main', 'dino_vits16')
-            # self.vfm = torch.hub.load('facebookresearch/dino:main', 'dino_vits8')
-            # self.vfm = torch.hub.load('facebookresearch/dino:main', 'dino_vitb16')
             self.vfm = torch.hub.load('facebookresearch/dino:main', 'dino_vitb8')
 
         elif vfm_model == 'dinov2':
-            # self.vfm = torch.hub.load('facebookresearch/dinov2', 'dinov2_vits14_reg')
             self.vfm = torch.hub.load('facebookresearch/dinov2', 'dinov2_vitb14_reg')
 
         elif vfm_model == 'mae':
@@ -124,28 +120,7 @@ class PPASegmentation(BaseSegmentor):
             ex_feats = self.vfm.image_encoder(imgs_norm)
 
         elif self.vfm_model == 'dino':
-            # feat = self.vfm.get_intermediate_layers(imgs_norm,n=4)
-            # ex_feats = []
-            # for feats in feat:
-            #     # print(feats.shape)
-            #     nb_im = feat[0].shape[0]  # Batch size
-            #     nb_tokens = feat[0].shape[1]  # Number of tokens
-            #     nh = self.vfm.blocks[0].attn.num_heads  # Number of heads
-            #     patch_size = self.vfm.patch_embed.patch_size
-            #     I, J = imgs_norm[0].shape[-2] // patch_size, imgs_norm[0].shape[-2] // patch_size
-            #     ex_feats1 = feats[:, 1:, :].reshape(nb_im, I, J, -1).permute(0, 3, 1, 2)
-            #     ex_feats.append(ex_feats1)
-            # print(ex_feats.shape)
 
-            # feat_out = {}
-            # def hook_fn_forward_qkv(module, input, output):
-            #     feat_out["qkv"] = output
-                # print("AAAAA")
-            # self.vfm._modules["blocks"][-1]._modules["attn"]._modules["qkv"].register_forward_hook(
-            #     hook_fn_forward_qkv)
-            #ori feat
-            #Forward pass in the model
-            # feat = self.vfm.get_intermediate_layers(imgs_norm)[0]
 
             feat = self.vfm.get_intermediate_layers(imgs_norm,n=2)[0]
 
@@ -153,22 +128,10 @@ class PPASegmentation(BaseSegmentor):
             nb_tokens = feat.shape[1]  # Number of tokens
             nh = self.vfm.blocks[0].attn.num_heads  # Number of heads
 
-            # qkv = (
-            #     feat_out["qkv"]
-            #     .reshape(nb_im, nb_tokens, 3, nh, -1 // nh)
-            #     .permute(2, 0, 3, 1, 4)
-            # )
-            # q, k, v = qkv[0], qkv[1], qkv[2]
-            # k = k.transpose(1, 2).reshape(nb_im, nb_tokens, -1)[:, 1:, :]
-            # q = q.transpose(1, 2).reshape(nb_im, nb_tokens, -1)[:, 1:, :]
-            # v = v.transpose(1, 2).reshape(nb_im, nb_tokens, -1)[:, 1:, :]
 
             patch_size = self.vfm.patch_embed.patch_size
             I, J = imgs_norm[0].shape[-2] // patch_size, imgs_norm[0].shape[-2] // patch_size
 
-            # ex_feats = q.reshape(nb_im, I, J, -1).permute(0, 3, 1, 2)
-            # ex_feats = k.reshape(nb_im, I, J, -1).permute(0, 3, 1, 2)
-            # ex_feats = v.reshape(nb_im, I, J, -1).permute(0, 3, 1, 2)
             ex_feats = feat[:, 1:, :].reshape(nb_im, I, J, -1).permute(0, 3, 1, 2)
 
         elif self.vfm_model == 'dinov2':

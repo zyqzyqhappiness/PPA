@@ -74,4 +74,4 @@ get_patchid.py
 configss/
 transformer_2.py
 proxyclip_segmentor copy.py
-patchid.ipynb
+patchid.ipynb__pycache__/

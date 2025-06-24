@@ -15,14 +15,6 @@ def parse_args():
     parser.add_argument(
         '--show', action='store_true', help='show prediction results')
     parser.add_argument(
-        '--beta',
-        type=float,
-        default=1.2)
-    parser.add_argument(
-        '--gamma',
-        type=float,
-        default=3.0)
-    parser.add_argument(
         '--show_dir',
         default='./show_dir/',
         help='directory to save visualizaion images')

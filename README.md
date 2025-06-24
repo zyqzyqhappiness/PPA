@@ -74,7 +74,7 @@ Please modify some settings in `configs/base_config.py` before running the evalu
 
 
 ```
-python eval.py --config ./config/cfg_DATASET.py --workdir YOUR_WORK_DIR
+python eval.py --config ./config/cfg_DATASET.py --work-dir YOUR_WORK_DIR
 ```
 
 Results will be saved in `results.xlsx`.

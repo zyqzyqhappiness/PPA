@@ -100,4 +100,4 @@ This project is licensed under <a rel="license" href="https://github.com/mc-lan/
 This implementation is based on [ProxyCLIP](https://github.com/mc-lan/ProxyCLIP). Thanks for the awesome work.
 
 ## Contact
-If you have any questions, please feel free to reach out at `zyq731@tju.edu.cn`.
+If you have any questions, please feel free to reach out at `zyq731@yahoo.com`.
